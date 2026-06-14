@@ -2,17 +2,12 @@
   'use strict';
 
   const CAMPUS_CENTER = [22.419, 114.207];
-  const DEFAULT_ZOOM = 15;
+  const DEFAULT_ZOOM = 16;
   const CAMPUS_BOUNDS = [
     [22.408, 114.195],
     [22.432, 114.218],
   ];
   const FALLBACK_IMAGE = 'images/pavilion-of-harmony.jpg';
-
-  const VIEW_ICON_SVG =
-    '<svg class="map-marker__view-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
-    '<path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>' +
-    '</svg>';
 
   let map;
   let osmLayer;
@@ -45,7 +40,6 @@
         '<div class="map-marker__preview" aria-hidden="true">' +
         '<div class="map-marker__preview-frame">' +
         '<img class="map-marker__preview-img" src="' + imageUrl + '" alt="' + alt + '" loading="lazy">' +
-        '<span class="map-marker__view-badge">' + VIEW_ICON_SVG + '<span>View</span></span>' +
         '</div>' +
         '</div>' +
         '<div class="map-marker__pin"></div>' +
