@@ -45,5 +45,6 @@ Edit `data/locations.json` and add entries with:
 - `id`, `nameZh`, `nameEn`, `lat`, `lng`
 - `category`: `landmark`, `building`, or `college`
 - `descriptionZh`, `descriptionEn`, `url`
+- `image`: path to photo in `images/` (e.g. `images/pavilion-of-harmony.jpg`)
 
-Coordinates can be sourced from the [CUHK Campus Map Data](https://gist.github.com/seventhmoon/8234c5bbde540c2c33da) gist.
+Add a JPEG to `images/` and set `image` to match. Run `python3 scripts/fetch-images.py` to pull Wikimedia originals.

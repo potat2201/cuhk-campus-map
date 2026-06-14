@@ -7,43 +7,94 @@
     [22.408, 114.195],
     [22.432, 114.218],
   ];
+  const FALLBACK_IMAGE = 'images/pavilion-of-harmony.jpg';
+
+  const VIEW_ICON_SVG =
+    '<svg class="map-marker__view-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+    '<path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>' +
+    '</svg>';
 
   let map;
   let osmLayer;
   let satelliteLayer;
   let layerGroups = {};
   let activeCategories = new Set(['landmark', 'building', 'college']);
-
-  function createMarkerIcon(category) {
-    return L.divIcon({
-      className: '',
-      html:
-        '<div class="map-marker map-marker--' + category + '">' +
-        '<div class="map-marker__pin"></div>' +
-        '<div class="map-marker__dot"></div>' +
-        '</div>',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
-    });
-  }
-
-  function buildPopupContent(location) {
-    return (
-      '<div class="popup">' +
-      '<h3 class="popup-title">' + escapeHtml(location.nameZh) + '</h3>' +
-      '<p class="popup-title-en">' + escapeHtml(location.nameEn) + '</p>' +
-      '<p class="popup-desc">' + escapeHtml(location.descriptionZh) + '</p>' +
-      '<p class="popup-desc-en">' + escapeHtml(location.descriptionEn) + '</p>' +
-      '<a class="popup-link" href="' + escapeHtml(location.url) + '" target="_blank" rel="noopener noreferrer">Learn more →</a>' +
-      '</div>'
-    );
-  }
+  let activeMarkerEl = null;
+  let detailPanel;
+  let detailCloseBtn;
 
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  function getLocationImage(location) {
+    return location.image || FALLBACK_IMAGE;
+  }
+
+  function createMarkerIcon(location) {
+    const category = location.category;
+    const imageUrl = escapeHtml(getLocationImage(location));
+    const alt = escapeHtml(location.nameZh);
+
+    return L.divIcon({
+      className: '',
+      html:
+        '<div class="map-marker map-marker--' + category + '" data-location-id="' + escapeHtml(location.id) + '">' +
+        '<div class="map-marker__preview" aria-hidden="true">' +
+        '<div class="map-marker__preview-frame">' +
+        '<img class="map-marker__preview-img" src="' + imageUrl + '" alt="' + alt + '" loading="lazy">' +
+        '<span class="map-marker__view-badge">' + VIEW_ICON_SVG + '<span>View</span></span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="map-marker__pin"></div>' +
+        '<div class="map-marker__dot"></div>' +
+        '</div>',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    });
+  }
+
+  function setMarkerHovered(markerEl, isHovered) {
+    if (!markerEl) return;
+    const inner = markerEl.querySelector('.map-marker');
+    if (inner) {
+      inner.classList.toggle('is-hovered', isHovered);
+    }
+  }
+
+  function clearActiveMarker() {
+    if (activeMarkerEl) {
+      setMarkerHovered(activeMarkerEl, false);
+      activeMarkerEl = null;
+    }
+  }
+
+  function showLocationDetail(location) {
+    const imageUrl = getLocationImage(location);
+
+    document.getElementById('location-detail-title-zh').textContent = location.nameZh;
+    document.getElementById('location-detail-title-en').textContent = location.nameEn;
+    document.getElementById('location-detail-desc-zh').textContent = location.descriptionZh;
+    document.getElementById('location-detail-desc-en').textContent = location.descriptionEn;
+
+    const img = document.getElementById('location-detail-image');
+    img.src = imageUrl;
+    img.alt = location.nameZh;
+
+    const link = document.getElementById('location-detail-link');
+    link.href = location.url;
+    link.textContent = 'Learn more →';
+
+    detailPanel.classList.remove('is-hidden');
+    detailPanel.setAttribute('aria-hidden', 'false');
+  }
+
+  function hideLocationDetail() {
+    detailPanel.classList.add('is-hidden');
+    detailPanel.setAttribute('aria-hidden', 'true');
+    clearActiveMarker();
   }
 
   function initMap() {
@@ -70,8 +121,41 @@
     );
 
     osmLayer.addTo(map);
-
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+  }
+
+  function bindMarkerInteractions(marker, location) {
+    marker.on('mouseover', function () {
+      const el = marker.getElement();
+      if (!el) return;
+      if (activeMarkerEl && activeMarkerEl !== el) {
+        setMarkerHovered(activeMarkerEl, false);
+      }
+      activeMarkerEl = el;
+      setMarkerHovered(el, true);
+    });
+
+    marker.on('mouseout', function () {
+      const el = marker.getElement();
+      if (el && activeMarkerEl === el && detailPanel.classList.contains('is-hidden')) {
+        setMarkerHovered(el, false);
+        activeMarkerEl = null;
+      }
+    });
+
+    marker.on('click', function (e) {
+      L.DomEvent.stopPropagation(e);
+      const el = marker.getElement();
+      if (el) {
+        if (activeMarkerEl && activeMarkerEl !== el) {
+          setMarkerHovered(activeMarkerEl, false);
+        }
+        activeMarkerEl = el;
+        setMarkerHovered(el, true);
+      }
+      showLocationDetail(location);
+      map.panTo([location.lat, location.lng], { animate: true, duration: 0.35 });
+    });
   }
 
   function createMarkers(locations) {
@@ -86,14 +170,11 @@
       if (!layerGroups[category]) return;
 
       const marker = L.marker([location.lat, location.lng], {
-        icon: createMarkerIcon(category),
+        icon: createMarkerIcon(location),
+        riseOnHover: true,
       });
 
-      marker.bindPopup(buildPopupContent(location), {
-        maxWidth: 300,
-        className: 'cuhk-popup',
-      });
-
+      bindMarkerInteractions(marker, location);
       layerGroups[category].addLayer(marker);
     });
 
@@ -176,10 +257,24 @@
     });
   }
 
+  function initDetailPanel() {
+    detailPanel = document.getElementById('location-detail');
+    detailCloseBtn = document.getElementById('location-detail-close');
+
+    detailCloseBtn.addEventListener('click', hideLocationDetail);
+
+    map.on('click', function () {
+      if (!detailPanel.classList.contains('is-hidden')) {
+        hideLocationDetail();
+      }
+    });
+  }
+
   function init() {
     initMap();
     initFilterPanel();
     initLayerSwitcher();
+    initDetailPanel();
 
     fetch('data/locations.json')
       .then(function (response) {
