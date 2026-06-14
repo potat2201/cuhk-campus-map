@@ -10,6 +10,12 @@ An interactive web map of The Chinese University of Hong Kong (香港中文大�
 - Filter panel to show/hide category groups
 - Map / Satellite layer toggle
 
+## Live demo
+
+[https://potat2201.github.io/cuhk-campus-map/](https://potat2201.github.io/cuhk-campus-map/)
+
+Hosted via GitHub Pages from the `main` branch.
+
 ## Run locally
 
 The app loads location data via `fetch`, so use a static file server:
