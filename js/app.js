@@ -118,6 +118,10 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
   }
 
+  function isMobileView() {
+    return window.matchMedia('(max-width: 600px)').matches;
+  }
+
   function bindMarkerInteractions(marker, location) {
     marker.on('mouseover', function () {
       const el = marker.getElement();
@@ -218,6 +222,11 @@
         toggleCategory(btn.dataset.category);
       });
     });
+
+    if (isMobileView()) {
+      panel.classList.add('collapsed');
+      openBtn.hidden = false;
+    }
   }
 
   function initLayerSwitcher() {
