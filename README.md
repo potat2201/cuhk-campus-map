@@ -4,11 +4,12 @@ An interactive web map of The Chinese University of Hong Kong (香港中文大�
 
 ## Features
 
-- Curated signature locations (landmarks, key buildings, colleges)
-- Color-coded teardrop markers by category
-- Popups with Chinese/English names, descriptions, and links
-- Filter panel to show/hide category groups
+- 18 curated campus locations (landmarks, key buildings, colleges)
+- Color-coded teardrop markers with animated circular photo previews on hover
+- Bottom detail panel with full-width photo banner, Chinese/English text, and links
+- Filter panel (3 categories; collapsed by default on mobile)
 - Map / Satellite layer toggle
+- Default zoom level 16
 
 ## Live demo
 

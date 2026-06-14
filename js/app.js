@@ -122,6 +122,21 @@
     return window.matchMedia('(max-width: 600px)').matches;
   }
 
+  function panToLocation(location) {
+    const latlng = L.latLng(location.lat, location.lng);
+
+    if (!isMobileView()) {
+      map.panTo(latlng, { animate: true, duration: 0.35 });
+      return;
+    }
+
+    const offsetY = Math.round(window.innerHeight * 0.2);
+    const zoom = map.getZoom();
+    const point = map.project(latlng, zoom);
+    const newCenter = map.unproject(L.point(point.x, point.y + offsetY), zoom);
+    map.panTo(newCenter, { animate: true, duration: 0.35 });
+  }
+
   function bindMarkerInteractions(marker, location) {
     marker.on('mouseover', function () {
       const el = marker.getElement();
@@ -152,7 +167,7 @@
         setMarkerHovered(el, true);
       }
       showLocationDetail(location);
-      map.panTo([location.lat, location.lng], { animate: true, duration: 0.35 });
+      panToLocation(location);
     });
   }
 
