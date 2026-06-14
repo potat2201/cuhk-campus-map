@@ -1,0 +1,200 @@
+[
+  {
+    "id": "pavilion-of-harmony",
+    "nameZh": "合一亭",
+    "nameEn": "Pavilion of Harmony",
+    "lat": 22.42149,
+    "lng": 114.20997,
+    "category": "landmark",
+    "descriptionZh": "新亞書院標誌景點，體現錢穆先生「天人合一」理念，遠眺吐露港與八仙嶺。",
+    "descriptionEn": "Iconic New Asia College pavilion embodying Chien Mu's philosophy of the unity of heaven and humanity.",
+    "url": "https://www.na.cuhk.edu.hk/"
+  },
+  {
+    "id": "pi-chiu-building",
+    "nameZh": "碧秋樓",
+    "nameEn": "Pi Ch'iu Building",
+    "lat": 22.41971,
+    "lng": 114.20640,
+    "category": "building",
+    "descriptionZh": "位於中央校園，為中大重要教學及活動建築。",
+    "descriptionEn": "A key teaching and activity building in the Central Campus.",
+    "url": "https://www.cuhk.edu.hk/english/campus/cuhk-campus-map.html"
+  },
+  {
+    "id": "lake-ad-excellentiam",
+    "nameZh": "未圓湖",
+    "nameEn": "Lake Ad Excellentiam",
+    "lat": 22.41606,
+    "lng": 114.20962,
+    "category": "landmark",
+    "descriptionZh": "崇基學院著名湖泊，湖畔曲橋拱橋景色優美。",
+    "descriptionEn": "Famous lake at Chung Chi College, surrounded by scenic curved and arched bridges.",
+    "url": "https://www.cc.cuhk.edu.hk/"
+  },
+  {
+    "id": "main-entrance",
+    "nameZh": "大學正門",
+    "nameEn": "University Main Entrance",
+    "lat": 22.41805,
+    "lng": 114.20321,
+    "category": "landmark",
+    "descriptionZh": "香港中文大學主入口，通往校園核心區域。",
+    "descriptionEn": "The main entrance to The Chinese University of Hong Kong.",
+    "url": "https://www.cuhk.edu.hk/"
+  },
+  {
+    "id": "gate-of-wisdom",
+    "nameZh": "《仲門》",
+    "nameEn": "Gate of Wisdom",
+    "lat": 22.41949,
+    "lng": 114.20521,
+    "category": "landmark",
+    "descriptionZh": "朱銘雕塑作品，矗立於大學本部廣場旁。",
+    "descriptionEn": "A sculpture by Ju Ming standing beside the University Mall.",
+    "url": "https://en.wikipedia.org/wiki/Gate_of_Wisdom"
+  },
+  {
+    "id": "the-beacon",
+    "nameZh": "烽火台",
+    "nameEn": "The Beacon",
+    "lat": 22.41949,
+    "lng": 114.20524,
+    "category": "landmark",
+    "descriptionZh": "校園標誌性雕塑，位於本部廣場一側。",
+    "descriptionEn": "A landmark sculpture on the University Mall.",
+    "url": "https://www.cuhk.edu.hk/"
+  },
+  {
+    "id": "university-mall",
+    "nameZh": "林蔭大道（百萬大道）",
+    "nameEn": "The University Mall",
+    "lat": 22.41946,
+    "lng": 114.20635,
+    "category": "landmark",
+    "descriptionZh": "貫穿中央校園的主幹道，兩旁綠樹成蔭。",
+    "descriptionEn": "The tree-lined main avenue running through the Central Campus.",
+    "url": "https://www.cuhk.edu.hk/"
+  },
+  {
+    "id": "cultural-square",
+    "nameZh": "文化廣場",
+    "nameEn": "Cultural Square",
+    "lat": 22.41854,
+    "lng": 114.20559,
+    "category": "landmark",
+    "descriptionZh": "校園文化活動及休憩的開放空間。",
+    "descriptionEn": "An open space for cultural activities and relaxation on campus.",
+    "url": "https://www.cuhk.edu.hk/"
+  },
+  {
+    "id": "philosophy-path",
+    "nameZh": "哲徑",
+    "nameEn": "Philosophy Path",
+    "lat": 22.41589,
+    "lng": 114.20966,
+    "category": "landmark",
+    "descriptionZh": "崇基學院幽靜小徑，適合漫步沉思。",
+    "descriptionEn": "A tranquil path at Chung Chi College ideal for contemplative walks.",
+    "url": "https://www.cc.cuhk.edu.hk/"
+  },
+  {
+    "id": "confucius-statue",
+    "nameZh": "孔子像",
+    "nameEn": "The Statue of Confucius",
+    "lat": 22.42068,
+    "lng": 114.20856,
+    "category": "landmark",
+    "descriptionZh": "新亞書院孔子像，體現書院重視人文精神。",
+    "descriptionEn": "Statue of Confucius at New Asia College, reflecting the college's humanistic spirit.",
+    "url": "https://www.na.cuhk.edu.hk/"
+  },
+  {
+    "id": "clock-tower",
+    "nameZh": "鐘樓",
+    "nameEn": "The Clock Tower",
+    "lat": 22.42114,
+    "lng": 114.20953,
+    "category": "landmark",
+    "descriptionZh": "新亞書院鐘樓，為書院地標建築之一。",
+    "descriptionEn": "The clock tower at New Asia College, one of the college's landmark buildings.",
+    "url": "https://www.na.cuhk.edu.hk/"
+  },
+  {
+    "id": "new-asia-concourse",
+    "nameZh": "圓形廣場",
+    "nameEn": "New Asia Concourse",
+    "lat": 22.42098,
+    "lng": 114.20821,
+    "category": "landmark",
+    "descriptionZh": "新亞書院圓形廣場，書院活動及集會場地。",
+    "descriptionEn": "The circular concourse at New Asia College for gatherings and events.",
+    "url": "https://www.na.cuhk.edu.hk/"
+  },
+  {
+    "id": "university-library",
+    "nameZh": "大學圖書館",
+    "nameEn": "University Library",
+    "lat": 22.41950,
+    "lng": 114.20491,
+    "category": "building",
+    "descriptionZh": "中大主圖書館，藏書豐富，為學術研究核心設施。",
+    "descriptionEn": "The main university library with extensive collections for academic research.",
+    "url": "https://www.lib.cuhk.edu.hk/"
+  },
+  {
+    "id": "sir-run-run-shaw-hall",
+    "nameZh": "邵逸夫堂",
+    "nameEn": "Sir Run Run Shaw Hall",
+    "lat": 22.42013,
+    "lng": 114.20711,
+    "category": "building",
+    "descriptionZh": "大型演講廳，舉辦講座、典禮及文化活動。",
+    "descriptionEn": "A large lecture hall for talks, ceremonies, and cultural events.",
+    "url": "https://www.cuhk.edu.hk/"
+  },
+  {
+    "id": "art-museum",
+    "nameZh": "文物館",
+    "nameEn": "Art Museum",
+    "lat": 22.41931,
+    "lng": 114.20580,
+    "category": "building",
+    "descriptionZh": "香港中文大學文物館，收藏中國古代文物及藝術品。",
+    "descriptionEn": "CUHK Art Museum housing collections of Chinese antiquities and artworks.",
+    "url": "https://www.artmuseum.cuhk.edu.hk/"
+  },
+  {
+    "id": "chung-chi-college",
+    "nameZh": "崇基學院",
+    "nameEn": "Chung Chi College",
+    "lat": 22.41499,
+    "lng": 114.20929,
+    "category": "college",
+    "descriptionZh": "中大創校書院之一，以全人教育及博雅精神聞名。",
+    "descriptionEn": "One of CUHK's founding colleges, known for whole-person education.",
+    "url": "https://www.cc.cuhk.edu.hk/"
+  },
+  {
+    "id": "new-asia-college",
+    "nameZh": "新亞書院",
+    "nameEn": "New Asia College",
+    "lat": 22.42161,
+    "lng": 114.20923,
+    "category": "college",
+    "descriptionZh": "中大書院之一，重視中國文化與人文關懷。",
+    "descriptionEn": "A CUHK college emphasizing Chinese culture and humanistic values.",
+    "url": "https://www.na.cuhk.edu.hk/"
+  },
+  {
+    "id": "united-college",
+    "nameZh": "聯合書院",
+    "nameEn": "United College",
+    "lat": 22.42140,
+    "lng": 114.20514,
+    "category": "college",
+    "descriptionZh": "中大書院之一，校園有瀑布、明德壁等特色景點。",
+    "descriptionEn": "A CUHK college featuring landmarks such as the cascade and Ming De Mural.",
+    "url": "https://www.uc.cuhk.edu.hk/"
+  }
+]
