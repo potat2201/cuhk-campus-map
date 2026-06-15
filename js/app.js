@@ -13,16 +13,289 @@
   let osmLayer;
   let satelliteLayer;
   let layerGroups = {};
-  let routeLayer;
+  let mtrChapelLayer;
+  let customWalkLayer;
   let routeStops = [];
   let markersById = {};
   let activeLocation = null;
+  let selectedCheckpointA = null;
+  let customWalkEndpoints = null;
+  let pathPickerEl;
+  let pathPickerTextEl;
+  let pathPickerClearBtn;
   let activeCategories = new Set(['landmark', 'building', 'college']);
   let activeMarkerEl = null;
   let detailPanel;
   let detailCloseBtn;
   let detailPrevBtn;
   let detailNextBtn;
+
+  function setCheckpointHighlight(location, isSelected) {
+    if (!location) return;
+    const marker = markersById[location.id];
+    if (!marker) return;
+    const el = marker.getElement();
+    if (!el) return;
+    const inner = el.querySelector('.map-marker');
+    if (inner) {
+      inner.classList.toggle('is-checkpoint-selected', isSelected);
+    }
+  }
+
+  function clearCheckpointHighlights() {
+    if (selectedCheckpointA) {
+      setCheckpointHighlight(selectedCheckpointA, false);
+    }
+    if (customWalkEndpoints) {
+      setCheckpointHighlight(customWalkEndpoints.from, false);
+      setCheckpointHighlight(customWalkEndpoints.to, false);
+    }
+  }
+
+  function updatePathPickerUI(state) {
+    if (!pathPickerEl || !pathPickerTextEl) return;
+
+    if (state === 'hidden') {
+      pathPickerEl.classList.add('is-hidden');
+      if (pathPickerClearBtn) pathPickerClearBtn.hidden = true;
+      return;
+    }
+
+    pathPickerEl.classList.remove('is-hidden');
+
+    if (state === 'pick-second') {
+      pathPickerTextEl.textContent =
+        'Stop ' + selectedCheckpointA.routeOrder + ' selected — tap another numbered stop for walking directions';
+      if (pathPickerClearBtn) pathPickerClearBtn.hidden = false;
+      return;
+    }
+
+    if (state === 'route-ready' && customWalkEndpoints) {
+      const from = customWalkEndpoints.from.routeOrder;
+      const to = customWalkEndpoints.to.routeOrder;
+      const meta = customWalkEndpoints.meta || {};
+      const distanceText = meta.distanceM ? ' · ~' + meta.distanceM + ' m' : '';
+      const durationText = meta.durationMin ? ' · ~' + meta.durationMin + ' min' : '';
+      pathPickerTextEl.textContent = 'Walking route: ' + from + ' → ' + to + distanceText + durationText;
+      if (pathPickerClearBtn) pathPickerClearBtn.hidden = false;
+    }
+  }
+
+  function clearCustomWalkRoute() {
+    if (customWalkLayer) {
+      map.removeLayer(customWalkLayer);
+      customWalkLayer = null;
+    }
+    clearCheckpointHighlights();
+    selectedCheckpointA = null;
+    customWalkEndpoints = null;
+    updatePathPickerUI('hidden');
+  }
+
+  function addWalkPolylines(layer, latlngs, color) {
+    const outline = L.polyline(latlngs, {
+      color: '#ffffff',
+      weight: 10,
+      opacity: 0.92,
+      lineCap: 'round',
+      lineJoin: 'round',
+    });
+
+    const line = L.polyline(latlngs, {
+      color: color,
+      weight: 6,
+      opacity: 0.95,
+      lineCap: 'round',
+      lineJoin: 'round',
+    });
+
+    layer.addLayer(outline);
+    layer.addLayer(line);
+  }
+
+  function drawCustomWalkRoute(from, to, path, meta) {
+    clearCustomWalkRoute();
+
+    customWalkLayer = L.layerGroup();
+    addWalkPolylines(customWalkLayer, path, '#ea580c');
+    customWalkLayer.addTo(map);
+
+    customWalkEndpoints = { from: from, to: to, meta: meta };
+    setCheckpointHighlight(from, true);
+    setCheckpointHighlight(to, true);
+    selectedCheckpointA = null;
+    updatePathPickerUI('route-ready');
+
+    const bounds = L.latLngBounds(path);
+    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 17 });
+  }
+
+  function decodePolyline(encoded, precisionDigits) {
+    var factor = Math.pow(10, -(precisionDigits || 6));
+    var index = 0;
+    var lat = 0;
+    var lng = 0;
+    var coordinates = [];
+
+    while (index < encoded.length) {
+      var shift = 0;
+      var result = 0;
+      var byte;
+
+      do {
+        byte = encoded.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      var deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += deltaLat;
+
+      shift = 0;
+      result = 0;
+
+      do {
+        byte = encoded.charCodeAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+
+      var deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += deltaLng;
+
+      coordinates.push([lat * factor, lng * factor]);
+    }
+
+    return coordinates;
+  }
+
+  function pathFromValhallaTrip(trip) {
+    var path = [];
+
+    trip.legs.forEach(function (leg) {
+      if (!leg.shape) return;
+      decodePolyline(leg.shape, 6).forEach(function (point) {
+        path.push(point);
+      });
+    });
+
+    return path;
+  }
+
+  function fetchWalkRouteBetween(from, to) {
+    if (pathPickerEl) pathPickerEl.classList.remove('is-hidden');
+    if (pathPickerTextEl) {
+      pathPickerTextEl.textContent =
+        'Calculating walking route ' + from.routeOrder + ' → ' + to.routeOrder + '…';
+    }
+    if (pathPickerClearBtn) pathPickerClearBtn.hidden = true;
+
+    fetch('https://valhalla1.openstreetmap.de/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locations: [
+          { lat: from.lat, lon: from.lng },
+          { lat: to.lat, lon: to.lng },
+        ],
+        costing: 'pedestrian',
+        costing_options: {
+          pedestrian: {
+            shortest: true,
+            use_hills: 1.0,
+            use_tracks: 1.0,
+            use_living_streets: 1.0,
+            walkway_factor: 0.1,
+          },
+        },
+        directions_options: { units: 'meters' },
+      }),
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('Routing request failed');
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data.trip || !data.trip.legs || !data.trip.legs.length) {
+          throw new Error('No walking route found');
+        }
+
+        const path = pathFromValhallaTrip(data.trip);
+        if (path.length < 2) throw new Error('Empty walking route');
+
+        const summary = data.trip.summary || {};
+        const distanceKm = summary.length || 0;
+        const meta = {
+          distanceM: Math.round(distanceKm * 1000),
+          durationMin: Math.max(1, Math.round((summary.time || 0) / 60)),
+        };
+
+        drawCustomWalkRoute(from, to, path, meta);
+      })
+      .catch(function (err) {
+        console.error(err);
+        fetchWalkRouteBetweenOsrmFallback(from, to);
+      });
+  }
+
+  function fetchWalkRouteBetweenOsrmFallback(from, to) {
+    const url =
+      'https://router.project-osrm.org/route/v1/foot/' +
+      from.lng + ',' + from.lat + ';' +
+      to.lng + ',' + to.lat +
+      '?overview=full&geometries=geojson';
+
+    fetch(url)
+      .then(function (response) {
+        if (!response.ok) throw new Error('Routing request failed');
+        return response.json();
+      })
+      .then(function (data) {
+        if (data.code !== 'Ok' || !data.routes || !data.routes.length) {
+          throw new Error('No walking route found');
+        }
+
+        const coords = data.routes[0].geometry.coordinates;
+        const path = coords.map(function (coord) {
+          return [coord[1], coord[0]];
+        });
+        const meta = {
+          distanceM: Math.round(data.routes[0].distance),
+          durationMin: Math.max(1, Math.round(data.routes[0].duration / 60)),
+        };
+
+        drawCustomWalkRoute(from, to, path, meta);
+      })
+      .catch(function (err) {
+        console.error(err);
+        clearCustomWalkRoute();
+        alert('Could not find a walking route between stops ' + from.routeOrder + ' and ' + to.routeOrder + '.');
+      });
+  }
+
+  function handleCheckpointSelection(location) {
+    if (!location.routeOrder) return;
+
+    if (customWalkLayer && !selectedCheckpointA) {
+      clearCustomWalkRoute();
+    }
+
+    if (!selectedCheckpointA) {
+      selectedCheckpointA = location;
+      setCheckpointHighlight(location, true);
+      updatePathPickerUI('pick-second');
+      return;
+    }
+
+    if (selectedCheckpointA.id === location.id) {
+      clearCustomWalkRoute();
+      return;
+    }
+
+    const from = selectedCheckpointA;
+    setCheckpointHighlight(from, false);
+    fetchWalkRouteBetween(from, location);
+  }
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -78,11 +351,27 @@
   function updateRouteNav(location) {
     if (!detailPrevBtn || !detailNextBtn) return;
 
+    const headerRow = document.querySelector('.location-detail__header-row');
     const isRouteStop = Boolean(location.routeOrder);
-    detailPrevBtn.hidden = !isRouteStop || location.routeOrder <= 1;
-    detailNextBtn.hidden = !isRouteStop || location.routeOrder >= routeStops.length;
-    detailPrevBtn.disabled = detailPrevBtn.hidden;
-    detailNextBtn.disabled = detailNextBtn.hidden;
+
+    if (headerRow) {
+      headerRow.classList.toggle('location-detail__header-row--route', isRouteStop);
+    }
+
+    if (!isRouteStop) {
+      detailPrevBtn.hidden = true;
+      detailNextBtn.hidden = true;
+      detailPrevBtn.classList.remove('is-inactive');
+      detailNextBtn.classList.remove('is-inactive');
+      return;
+    }
+
+    detailPrevBtn.hidden = false;
+    detailNextBtn.hidden = false;
+    detailPrevBtn.disabled = location.routeOrder <= 1;
+    detailNextBtn.disabled = location.routeOrder >= routeStops.length;
+    detailPrevBtn.classList.toggle('is-inactive', location.routeOrder <= 1);
+    detailNextBtn.classList.toggle('is-inactive', location.routeOrder >= routeStops.length);
   }
 
   function showLocationDetail(location) {
@@ -214,6 +503,7 @@
     marker.on('click', function (e) {
       L.DomEvent.stopPropagation(e);
       openLocation(location);
+      handleCheckpointSelection(location);
     });
   }
 
@@ -246,56 +536,69 @@
     });
   }
 
-  function drawRoute(locations) {
-    const stops = locations
-      .filter(function (location) {
-        return location.routeOrder;
-      })
-      .sort(function (a, b) {
-        return a.routeOrder - b.routeOrder;
-      });
-
-    if (stops.length < 2) return;
-
-    routeLayer = L.layerGroup();
-
-    function addRouteSegment(segmentStops, color) {
-      if (segmentStops.length < 2) return;
-
-      const latlngs = segmentStops.map(function (location) {
-        return [location.lat, location.lng];
-      });
-
-      const outline = L.polyline(latlngs, {
-        color: '#ffffff',
-        weight: 9,
-        opacity: 0.9,
-        lineCap: 'round',
-        lineJoin: 'round',
-      });
-
-      const line = L.polyline(latlngs, {
-        color: color,
-        weight: 5,
-        opacity: 0.9,
-        lineCap: 'round',
-        lineJoin: 'round',
-      });
-
-      routeLayer.addLayer(outline);
-      routeLayer.addLayer(line);
-    }
-
-    const firstLeg = stops.filter(function (location) {
-      return location.routeOrder <= 5;
+  function createEndpointIcon(label, modifier) {
+    return L.divIcon({
+      className: '',
+      html:
+        '<div class="map-endpoint map-endpoint--' + modifier + '">' +
+        '<div class="map-endpoint__pin"></div>' +
+        '<span class="map-endpoint__label">' + escapeHtml(label) + '</span>' +
+        '</div>',
+      iconSize: [1, 1],
+      iconAnchor: [12, 36],
     });
-    const secondLeg = stops.filter(function (location) {
-      return location.routeOrder >= 5;
+  }
+
+  function endpointToLocation(point, role) {
+    return {
+      id: point.id,
+      nameZh: point.nameZh,
+      nameEn: point.nameEn,
+      lat: point.lat,
+      lng: point.lng,
+      category: role,
+      descriptionZh: role === 'start'
+        ? '港鐵大學站廣場（校巴及穿梭巴士總站），前往崇基學院禮拜堂的步行路線起點。'
+        : '崇基學院禮拜堂，中大校園內最早的獨立禮拜建築之一。',
+      descriptionEn: role === 'start'
+        ? 'University MTR Station Piazza (campus shuttle bus terminus), start of the walking route to Chung Chi College Chapel.'
+        : 'Chung Chi College Chapel, one of the earliest independent sanctuaries for worship on a public university campus in China.',
+      url: role === 'start'
+        ? 'https://www.mtr.com.hk/en/customer/services/stations_university.html'
+        : 'https://www.ccc.cuhk.edu.hk/en/content.php?wid=311',
+      image: role === 'start' ? 'images/main-entrance.jpg' : 'images/chung-chi-college.jpg',
+    };
+  }
+
+  function drawWalkingPath(routeData) {
+    if (!routeData.path || routeData.path.length < 2) return;
+
+    mtrChapelLayer = L.layerGroup();
+    const color = routeData.color || '#0d9488';
+
+    addWalkPolylines(mtrChapelLayer, routeData.path, color);
+
+    const startLocation = endpointToLocation(routeData.start, 'start');
+    const endLocation = endpointToLocation(routeData.end, 'end');
+
+    const startMarker = L.marker([routeData.start.lat, routeData.start.lng], {
+      icon: createEndpointIcon('Plaza', 'start'),
+      riseOnHover: true,
+      zIndexOffset: 200,
     });
 
-    addRouteSegment(firstLeg, '#16a34a');
-    addRouteSegment(secondLeg, '#6366f1');
-    routeLayer.addTo(map);
+    const endMarker = L.marker([routeData.end.lat, routeData.end.lng], {
+      icon: createEndpointIcon('Chapel', 'end'),
+      riseOnHover: true,
+      zIndexOffset: 200,
+    });
+
+    bindMarkerInteractions(startMarker, startLocation);
+    bindMarkerInteractions(endMarker, endLocation);
+
+    mtrChapelLayer.addLayer(startMarker);
+    mtrChapelLayer.addLayer(endMarker);
+    mtrChapelLayer.addTo(map);
   }
 
   function toggleCategory(category) {
@@ -375,6 +678,19 @@
     });
   }
 
+  function initPathPicker() {
+    pathPickerEl = document.getElementById('path-picker');
+    pathPickerTextEl = document.getElementById('path-picker-text');
+    pathPickerClearBtn = document.getElementById('path-picker-clear');
+
+    if (pathPickerClearBtn) {
+      pathPickerClearBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        clearCustomWalkRoute();
+      });
+    }
+  }
+
   function initDetailPanel() {
     detailPanel = document.getElementById('location-detail');
     detailCloseBtn = document.getElementById('location-detail-close');
@@ -408,6 +724,7 @@
     initMap();
     initFilterPanel();
     initLayerSwitcher();
+    initPathPicker();
     initDetailPanel();
 
     fetch('data/locations.json')
@@ -423,12 +740,23 @@
           .sort(function (a, b) {
             return a.routeOrder - b.routeOrder;
           });
-        drawRoute(locations);
         createMarkers(locations);
       })
       .catch(function (err) {
         console.error(err);
         alert('Could not load location data. Please run a local server (see README).');
+      });
+
+    fetch('data/mtr-chapel-route.json')
+      .then(function (response) {
+        if (!response.ok) throw new Error('Failed to load walking route');
+        return response.json();
+      })
+      .then(function (routeData) {
+        drawWalkingPath(routeData);
+      })
+      .catch(function (err) {
+        console.error(err);
       });
   }
 

@@ -15,6 +15,11 @@
   <p>香港中文大學校園地圖</p>
   </div>
 
+  <div id="path-picker" class="path-picker is-hidden" aria-live="polite">
+    <p id="path-picker-text" class="path-picker__text"></p>
+    <button type="button" id="path-picker-clear" class="path-picker__clear" hidden>Clear path</button>
+  </div>
+
   <aside id="filter-panel" class="filter-panel" aria-label="Map filter">
     <div class="filter-panel__header">
       <h2>Map filter</h2>
@@ -78,6 +83,6 @@
   </aside>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
