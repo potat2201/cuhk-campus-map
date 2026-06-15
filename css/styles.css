@@ -290,6 +290,33 @@ body {
   z-index: 1;
 }
 
+.map-marker__number {
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #111827;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.map-marker--route .map-marker__pin {
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.35);
+}
+
+.map-marker--route.is-hovered .map-marker__number {
+  transform: scale(1.08);
+}
+
 .map-marker__preview {
   position: absolute;
   left: 50%;
@@ -512,6 +539,47 @@ body {
   overflow-y: auto;
 }
 
+.location-detail__header-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.location-detail__titles {
+  min-width: 0;
+}
+
+.location-detail__nav-btn {
+  width: 36px;
+  height: 36px;
+  margin-top: 2px;
+  border: 1px solid var(--ui-border);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ui-accent);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.location-detail__nav-btn:hover:not(:disabled) {
+  background: var(--ui-accent-soft);
+  border-color: rgba(17, 24, 39, 0.16);
+}
+
+.location-detail__nav-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.location-detail__nav-btn:disabled,
+.location-detail__nav-btn[hidden] {
+  display: none;
+}
+
 .location-detail__title {
   margin: 0 0 4px;
   font-size: 1.25rem;
@@ -519,7 +587,7 @@ body {
 }
 
 .location-detail__title-en {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 0.9rem;
   color: #718096;
   font-style: italic;

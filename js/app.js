@@ -13,10 +13,16 @@
   let osmLayer;
   let satelliteLayer;
   let layerGroups = {};
+  let routeLayer;
+  let routeStops = [];
+  let markersById = {};
+  let activeLocation = null;
   let activeCategories = new Set(['landmark', 'building', 'college']);
   let activeMarkerEl = null;
   let detailPanel;
   let detailCloseBtn;
+  let detailPrevBtn;
+  let detailNextBtn;
 
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -32,18 +38,22 @@
     const category = location.category;
     const imageUrl = escapeHtml(getLocationImage(location));
     const alt = escapeHtml(location.nameZh);
+    const markerBadge = location.routeOrder
+      ? '<div class="map-marker__number" aria-label="Stop ' + location.routeOrder + '">' + location.routeOrder + '</div>'
+      : '<div class="map-marker__dot"></div>';
+    const routeClass = location.routeOrder ? ' map-marker--route' : '';
 
     return L.divIcon({
       className: '',
       html:
-        '<div class="map-marker map-marker--' + category + '" data-location-id="' + escapeHtml(location.id) + '">' +
+        '<div class="map-marker map-marker--' + category + routeClass + '" data-location-id="' + escapeHtml(location.id) + '">' +
         '<div class="map-marker__preview" aria-hidden="true">' +
         '<div class="map-marker__preview-frame">' +
         '<img class="map-marker__preview-img" src="' + imageUrl + '" alt="' + alt + '" loading="lazy">' +
         '</div>' +
         '</div>' +
         '<div class="map-marker__pin"></div>' +
-        '<div class="map-marker__dot"></div>' +
+        markerBadge +
         '</div>',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
@@ -65,10 +75,21 @@
     }
   }
 
+  function updateRouteNav(location) {
+    if (!detailPrevBtn || !detailNextBtn) return;
+
+    const isRouteStop = Boolean(location.routeOrder);
+    detailPrevBtn.hidden = !isRouteStop || location.routeOrder <= 1;
+    detailNextBtn.hidden = !isRouteStop || location.routeOrder >= routeStops.length;
+    detailPrevBtn.disabled = detailPrevBtn.hidden;
+    detailNextBtn.disabled = detailNextBtn.hidden;
+  }
+
   function showLocationDetail(location) {
     const imageUrl = getLocationImage(location);
 
-    document.getElementById('location-detail-title-zh').textContent = location.nameZh;
+    document.getElementById('location-detail-title-zh').textContent =
+      location.routeOrder ? location.routeOrder + '. ' + location.nameZh : location.nameZh;
     document.getElementById('location-detail-title-en').textContent = location.nameEn;
     document.getElementById('location-detail-desc-zh').textContent = location.descriptionZh;
     document.getElementById('location-detail-desc-en').textContent = location.descriptionEn;
@@ -81,13 +102,47 @@
     link.href = location.url;
     link.textContent = 'Learn more →';
 
+    updateRouteNav(location);
+
     detailPanel.classList.remove('is-hidden');
     detailPanel.setAttribute('aria-hidden', 'false');
+  }
+
+  function highlightMarkerForLocation(location) {
+    clearActiveMarker();
+    const marker = markersById[location.id];
+    if (!marker) return;
+
+    const el = marker.getElement();
+    if (el) {
+      activeMarkerEl = el;
+      setMarkerHovered(el, true);
+    }
+  }
+
+  function openLocation(location) {
+    activeLocation = location;
+    showLocationDetail(location);
+    highlightMarkerForLocation(location);
+    panToLocation(location);
+  }
+
+  function navigateRoute(offset) {
+    if (!activeLocation || !activeLocation.routeOrder) return;
+
+    const currentIndex = routeStops.findIndex(function (stop) {
+      return stop.id === activeLocation.id;
+    });
+    const nextIndex = currentIndex + offset;
+    if (nextIndex < 0 || nextIndex >= routeStops.length) return;
+
+    openLocation(routeStops[nextIndex]);
   }
 
   function hideLocationDetail() {
     detailPanel.classList.add('is-hidden');
     detailPanel.setAttribute('aria-hidden', 'true');
+    activeLocation = null;
     clearActiveMarker();
   }
 
@@ -158,16 +213,7 @@
 
     marker.on('click', function (e) {
       L.DomEvent.stopPropagation(e);
-      const el = marker.getElement();
-      if (el) {
-        if (activeMarkerEl && activeMarkerEl !== el) {
-          setMarkerHovered(activeMarkerEl, false);
-        }
-        activeMarkerEl = el;
-        setMarkerHovered(el, true);
-      }
-      showLocationDetail(location);
-      panToLocation(location);
+      openLocation(location);
     });
   }
 
@@ -185,9 +231,11 @@
       const marker = L.marker([location.lat, location.lng], {
         icon: createMarkerIcon(location),
         riseOnHover: true,
+        zIndexOffset: location.routeOrder ? 100 + location.routeOrder : 0,
       });
 
       bindMarkerInteractions(marker, location);
+      markersById[location.id] = marker;
       layerGroups[category].addLayer(marker);
     });
 
@@ -196,6 +244,58 @@
         layerGroups[category].addTo(map);
       }
     });
+  }
+
+  function drawRoute(locations) {
+    const stops = locations
+      .filter(function (location) {
+        return location.routeOrder;
+      })
+      .sort(function (a, b) {
+        return a.routeOrder - b.routeOrder;
+      });
+
+    if (stops.length < 2) return;
+
+    routeLayer = L.layerGroup();
+
+    function addRouteSegment(segmentStops, color) {
+      if (segmentStops.length < 2) return;
+
+      const latlngs = segmentStops.map(function (location) {
+        return [location.lat, location.lng];
+      });
+
+      const outline = L.polyline(latlngs, {
+        color: '#ffffff',
+        weight: 9,
+        opacity: 0.9,
+        lineCap: 'round',
+        lineJoin: 'round',
+      });
+
+      const line = L.polyline(latlngs, {
+        color: color,
+        weight: 5,
+        opacity: 0.9,
+        lineCap: 'round',
+        lineJoin: 'round',
+      });
+
+      routeLayer.addLayer(outline);
+      routeLayer.addLayer(line);
+    }
+
+    const firstLeg = stops.filter(function (location) {
+      return location.routeOrder <= 5;
+    });
+    const secondLeg = stops.filter(function (location) {
+      return location.routeOrder >= 5;
+    });
+
+    addRouteSegment(firstLeg, '#16a34a');
+    addRouteSegment(secondLeg, '#6366f1');
+    routeLayer.addTo(map);
   }
 
   function toggleCategory(category) {
@@ -278,8 +378,24 @@
   function initDetailPanel() {
     detailPanel = document.getElementById('location-detail');
     detailCloseBtn = document.getElementById('location-detail-close');
+    detailPrevBtn = document.getElementById('location-detail-prev');
+    detailNextBtn = document.getElementById('location-detail-next');
 
     detailCloseBtn.addEventListener('click', hideLocationDetail);
+
+    if (detailPrevBtn) {
+      detailPrevBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        navigateRoute(-1);
+      });
+    }
+
+    if (detailNextBtn) {
+      detailNextBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        navigateRoute(1);
+      });
+    }
 
     map.on('click', function () {
       if (!detailPanel.classList.contains('is-hidden')) {
@@ -300,6 +416,14 @@
         return response.json();
       })
       .then(function (locations) {
+        routeStops = locations
+          .filter(function (location) {
+            return location.routeOrder;
+          })
+          .sort(function (a, b) {
+            return a.routeOrder - b.routeOrder;
+          });
+        drawRoute(locations);
         createMarkers(locations);
       })
       .catch(function (err) {

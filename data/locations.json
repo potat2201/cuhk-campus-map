@@ -9,7 +9,8 @@
     "descriptionZh": "新亞書院標誌景點，體現錢穆先生「天人合一」理念，遠眺吐露港與八仙嶺。",
     "descriptionEn": "Iconic New Asia College pavilion embodying Chien Mu's philosophy of the unity of heaven and humanity.",
     "url": "https://www.na.cuhk.edu.hk/",
-    "image": "images/pavilion-of-harmony.jpg"
+    "image": "images/pavilion-of-harmony.jpg",
+    "routeOrder": 9
   },
   {
     "id": "pi-chiu-building",
@@ -33,7 +34,8 @@
     "descriptionZh": "崇基學院著名湖泊，湖畔曲橋拱橋景色優美。",
     "descriptionEn": "Famous lake at Chung Chi College, surrounded by scenic curved and arched bridges.",
     "url": "https://www.cc.cuhk.edu.hk/",
-    "image": "images/lake-ad-excellentiam.jpg"
+    "image": "images/lake-ad-excellentiam.jpg",
+    "routeOrder": 2
   },
   {
     "id": "main-entrance",
@@ -81,7 +83,8 @@
     "descriptionZh": "貫穿中央校園的主幹道，兩旁綠樹成蔭。",
     "descriptionEn": "The tree-lined main avenue running through the Central Campus.",
     "url": "https://www.cuhk.edu.hk/",
-    "image": "images/university-mall.jpg"
+    "image": "images/university-mall.jpg",
+    "routeOrder": 5
   },
   {
     "id": "cultural-square",
@@ -93,7 +96,8 @@
     "descriptionZh": "校園文化活動及休憩的開放空間。",
     "descriptionEn": "An open space for cultural activities and relaxation on campus.",
     "url": "https://www.cuhk.edu.hk/",
-    "image": "images/cultural-square.jpg"
+    "image": "images/cultural-square.jpg",
+    "routeOrder": 3
   },
   {
     "id": "philosophy-path",
@@ -129,7 +133,8 @@
     "descriptionZh": "新亞書院鐘樓，為書院地標建築之一。",
     "descriptionEn": "The clock tower at New Asia College, one of the college's landmark buildings.",
     "url": "https://www.na.cuhk.edu.hk/",
-    "image": "images/clock-tower.jpg"
+    "image": "images/clock-tower.jpg",
+    "routeOrder": 8
   },
   {
     "id": "new-asia-concourse",
@@ -141,7 +146,8 @@
     "descriptionZh": "新亞書院圓形廣場，書院活動及集會場地。",
     "descriptionEn": "The circular concourse at New Asia College for gatherings and events.",
     "url": "https://www.na.cuhk.edu.hk/",
-    "image": "images/new-asia-concourse.jpg"
+    "image": "images/new-asia-concourse.jpg",
+    "routeOrder": 7
   },
   {
     "id": "university-library",
@@ -165,7 +171,8 @@
     "descriptionZh": "大型演講廳，舉辦講座、典禮及文化活動。",
     "descriptionEn": "A large lecture hall for talks, ceremonies, and cultural events.",
     "url": "https://www.cuhk.edu.hk/",
-    "image": "images/sir-run-run-shaw-hall.jpg"
+    "image": "images/sir-run-run-shaw-hall.jpg",
+    "routeOrder": 6
   },
   {
     "id": "art-museum",
@@ -177,7 +184,8 @@
     "descriptionZh": "香港中文大學文物館，收藏中國古代文物及藝術品。",
     "descriptionEn": "CUHK Art Museum housing collections of Chinese antiquities and artworks.",
     "url": "https://www.artmuseum.cuhk.edu.hk/",
-    "image": "images/art-museum.jpg"
+    "image": "images/art-museum.jpg",
+    "routeOrder": 4
   },
   {
     "id": "chung-chi-college",
@@ -189,7 +197,8 @@
     "descriptionZh": "中大創校書院之一，以全人教育及博雅精神聞名。",
     "descriptionEn": "One of CUHK's founding colleges, known for whole-person education.",
     "url": "https://www.cc.cuhk.edu.hk/",
-    "image": "images/chung-chi-college.jpg"
+    "image": "images/chung-chi-college.jpg",
+    "routeOrder": 1
   },
   {
     "id": "new-asia-college",

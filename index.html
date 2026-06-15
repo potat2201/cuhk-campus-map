@@ -63,8 +63,14 @@
       <img id="location-detail-image" class="location-detail__image" src="" alt="">
     </div>
     <div class="location-detail__body">
-      <h2 id="location-detail-title-zh" class="location-detail__title"></h2>
-      <p id="location-detail-title-en" class="location-detail__title-en"></p>
+      <div class="location-detail__header-row">
+        <button type="button" id="location-detail-prev" class="location-detail__nav-btn" aria-label="Previous stop" hidden>←</button>
+        <div class="location-detail__titles">
+          <h2 id="location-detail-title-zh" class="location-detail__title"></h2>
+          <p id="location-detail-title-en" class="location-detail__title-en"></p>
+        </div>
+        <button type="button" id="location-detail-next" class="location-detail__nav-btn" aria-label="Next stop" hidden>→</button>
+      </div>
       <p id="location-detail-desc-zh" class="location-detail__desc"></p>
       <p id="location-detail-desc-en" class="location-detail__desc-en"></p>
       <a id="location-detail-link" class="location-detail__link" href="#" target="_blank" rel="noopener noreferrer">Learn more →</a>
@@ -72,6 +78,6 @@
   </aside>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>
